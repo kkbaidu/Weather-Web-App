@@ -1,7 +1,5 @@
 
-
-export type apiData = [
-    {
+export type WeatherData = {
         "coord": {
             "lon": number,
             "lat": number
@@ -36,8 +34,8 @@ export type apiData = [
         },
         "dt": number,
         "sys": {
-            "type": number,
-            "id": number,
+            "type"?: number,
+            "id"?: number,
             "country": string,
             "sunrise": number,
             "sunset": number
@@ -47,4 +45,3 @@ export type apiData = [
         "name": string,
         "cod": number
         }
-]
