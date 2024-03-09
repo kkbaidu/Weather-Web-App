@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { InputText } from 'primereact/inputtext';
 import { defaultWeatherData } from "@/lib/data";
-import { WeatherData } from "@/lib/definitions";
+import { WeatherData, ForecastData, List } from "@/lib/definitions";
 import Image from "next/image";
 import cloudImg from "@/public/fluent--weather-cloudy-filled.svg";
 import rainyCloud from "@/public/rainy-cloud.svg";
@@ -20,12 +20,15 @@ const imageLoader = ({ src, width, quality }: any) => {
 
 const Page = () => {
   const [weatherData, setWeatherData] = useState<WeatherData>(defaultWeatherData);
+  const [forecastData, setForecastData] = useState<ForecastData>()
   const [searchQuery, setSearchQuery] = useState<string>('Accra');
   const [unit, setUnit] = useState("metric");
   const [metric, setMetric] = useState(true);
-  const [forecastPeriod, setForecastPeriod] = useState("today")
+  const [forecastPeriod, setForecastPeriod] = useState("today");
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const apiKey = "634caabc9bb4672b24050648b3d9400d" //process.env.NEXT_PUBLIC_API_KEY;
+  const displayingDates: string[] = []; 
 
   const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${apiKey}&units=${unit}`;
   const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${searchQuery}&appid=${apiKey}&units=${unit}`;
@@ -48,6 +51,28 @@ const Page = () => {
     fetchWeatherData();
   }, [searchQuery, unit]);
 
+  useEffect(() => {
+    const fetchForecastData = async () => {
+      try {
+        const response = await axios.get(forecastApiUrl);
+
+        if (response.data) {
+          setForecastData(response.data);
+        } else {
+          console.error('Failed to fetch weather data');
+        }
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+      }
+    };
+
+    fetchForecastData();
+  }, [searchQuery, unit])
+
+  const handleFiveDaysButton = () => {
+    setForecastPeriod("5days");
+  }
+
   function convertToLocalTime(dt: number) {
     const date = new Date(dt * 1000);
 
@@ -67,28 +92,37 @@ const Page = () => {
 
   const icon: any = weatherData?.weather[0].icon;
 
-  const sunriseTime = convertToLocalTime(Number(weatherData?.sys.sunrise));
-  const sunsetTime = convertToLocalTime(Number(weatherData?.sys.sunset));
-
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   const handleSearch = (event: any) => {
     setSearchQuery(event.target.value);
   }
 
-  const handleMetricUnit = () => {
-    setMetric(!metric);
-  }
+  const arr: string[] = [];
+    const forecastList: List[] | undefined= forecastData?.list; 
+    if(typeof forecastList === "undefined") {
+      return false;
+    } else {
+      for(let obj of forecastList) {
+        let detailedDate = obj.dt_txt;
+        let date = detailedDate.slice(0, 10)
+        let isAvailable = arr.includes(detailedDate.slice(0, 10))
+        if(isAvailable) {
+           false;
+        } else {
+          arr.push(date);
+          displayingDates.push(detailedDate);
+        }
+      }
+    }
 
-  // if(!weatherData) {
-  //   return (
-  //     <div> 
-  //       Data Loading
-  //     </div>
-  //   )
-  // }
+  const filteredList: List[] | undefined = forecastData?.list.filter(item =>
+    displayingDates.some(date => item.dt_txt.includes(date))
+  );
 
-
+  const sunriseTime = convertToLocalTime(Number(weatherData?.sys.sunrise));
+  const sunsetTime = convertToLocalTime(Number(weatherData?.sys.sunset));
+  let indexObj = typeof filteredList === "undefined" ? undefined : filteredList[activeIndex];
 
   return (
     <div  className="flex flex-col md:flex-row lg:flex-row justify-between p-0 w-full">
@@ -96,7 +130,10 @@ const Page = () => {
         <div id="navbar" className="md:hidden lg:hidden fixed flex flex-row justify-between items-center my-2 h-12 border-gray-100 shadow-sm border-b-2 w-[88%] bg-[#fff] z-10">
             <span className="flex flex-row justify-between w-[37%]">
               <button> Today </button>
-              <button className="text-[#bababa]"> 5 days </button>
+              <button
+              className="text-[#bababa]"
+              onClick={handleFiveDaysButton}
+              > 6 days </button>
             </span>
             <span className="h-full flex flex-row items-center">
               <button 
@@ -129,12 +166,12 @@ const Page = () => {
           {
             typeof weatherData.weather[0].icon === "string" ? 
             <Image
-            loader={imageLoader}
-            src={icon}
-            alt="Image"
-            width={200}
-            height={200}
-          /> : 
+              loader={imageLoader}
+              src={icon}
+              alt="Image"
+              width={200}
+              height={200}
+            /> : 
           <div className="animate-pulse bg-[#def4fc] py-8 w-[140px] h-[140px] rounded-full mt-[30px]">
           </div>
           }
@@ -149,7 +186,7 @@ const Page = () => {
             {
               typeof weatherData.dt === "number" ?
               <div className="text-[#bababa]">
-                <span className="text-black"> {`${days[Number(convertToLocalTime(weatherData.dt)[2])-1]},`} </span> {`${convertToLocalTime(weatherData.dt)[3]}: ${convertToLocalTime(weatherData.dt)[4]}`} 
+                <span className="text-black"> {`${days[Number(convertToLocalTime(weatherData.dt)[2])-4]},`} </span> {`${convertToLocalTime(weatherData.dt)[3]}: ${convertToLocalTime(weatherData.dt)[4]}`} 
               </div>
             :
             <div className="animate-pulse bg-[#def4fc] py-4 w-[90px] rounded-full mt-3 h-[10px]">
@@ -164,10 +201,9 @@ const Page = () => {
             width={40}
             height={40}
           />
-            <span className="flex flex-row items-center">
-            Cloudy @  
+            <span>
               {
-                typeof weatherData.clouds.all === "number" ? <span>{weatherData.clouds.all}%</span> 
+                typeof weatherData.clouds.all === "number" ? <span> Cloudy @ {weatherData.clouds.all}%</span> 
                 : 
                 <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
                 </div>
@@ -182,9 +218,9 @@ const Page = () => {
             width={40}
             height={40}
           />
-            <span className="flex flex-row items-center"> Main:  
+            <span> 
             {
-                typeof weatherData.weather[0].main === "string" ? <span> {weatherData.weather[0].main}</span> 
+                typeof weatherData.weather[0].main === "string" ? <span> Main: {weatherData.weather[0].main}</span> 
                 : 
                 <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
                 </div>
@@ -212,8 +248,8 @@ const Page = () => {
             > Today </button>
             <button 
             className={`${forecastPeriod==="5days"? "": "text-[#bababa]"}`}
-            onClick={()=> setForecastPeriod("5days")}
-            > 5 days </button>
+            onClick={handleFiveDaysButton}
+            > 6 days </button>
           </span>
           <span className="h-full flex flex-row items-center">
             <button 
@@ -377,8 +413,92 @@ const Page = () => {
           </div>
         </div>
         :
-        <div className="mt-[80px]">
-          Hello World
+        //  5 days
+        <div className="mt-[90px]">
+          <span className="italic text-[#bababa] fixed top-[80px] z-20"> Please click to preview </span>
+          <div className="flex flex-row pt-5 pb-3 fixed bg-white w-full overflow-auto">
+            {
+              typeof filteredList === "undefined"? <></> :
+              filteredList.map((preview, index) => {
+                const date = new Date(preview.dt_txt.slice(0, 10));
+                const dayIndex = date.getDay();
+                const dayName = days[dayIndex];
+                return (
+                  <div 
+                  key={index} 
+                  className="flex flex-col items-center border shadow-md w-[120px] h-[160px] py-8 mx-2 rounded-xl cursor-pointer"
+                  onClick={() => setActiveIndex(index)}
+                  >
+                    <span> {dayName} </span>
+                    <Image
+                    loader={imageLoader}
+                      src={preview.weather[0].icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="h-[100px] rounded-lg opacity-80"
+                    />
+                    <span> {`${preview.main.temp}${unit==="metric"? "°C": "°F"}`} </span>
+                  </div>
+                )
+              })
+            }
+          </div>
+          <div className="mt-[200px]">
+            <span className="font-bold text-[20px] pl-3"> Preview </span>
+            <div className="grid md:grid-cols-3 lg:grid-cols-3 grid-cols-2 md:grid-rows-2 place-items-center lg:grid-rows-2 grid-rows-3 gap-y-4 py-4">
+                <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
+                  <span className="text-[20px] text-[#bababa]"> Min Temperature </span>
+                  {
+                    typeof weatherData?.main.temp_min === "number" ? <span className="font-semibold text-[30px]"> {`${typeof indexObj === "undefined" ? "N/A" : indexObj.main.temp_min}${unit==="metric"? "°C": "°F"}`} </span>
+                    : 
+                    <div className="animate-pulse bg-[#def4fc] w-[120px] rounded-full h-[50px]">
+                    </div>
+                  }
+                  <span> Normal</span>
+                </div>
+                <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
+                  <span className="text-[20px] text-[#bababa]"> Max Temperature </span>
+                  {
+                    typeof weatherData?.main.temp_max === "number" ? <span className="font-semibold text-[30px]"> {`${typeof indexObj === "undefined" ? "N/A" : indexObj.main.temp_max}${unit==="metric"? "°C": "°F"}`}</span>
+                    : 
+                    <div className="animate-pulse bg-[#def4fc] w-[120px] rounded-full h-[50px]">
+                    </div>
+                  }
+                  <span> Normal</span>
+                </div>
+                <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
+                  <span className="text-[20px] text-[#bababa]"> Humidity </span>
+                  {
+                    typeof weatherData?.main.humidity === "number" ? <span className="font-semibold text-[30px]"> {typeof indexObj === "undefined" ? "N/A" : indexObj.main.humidity}% </span>
+                    : 
+                    <div className="animate-pulse bg-[#def4fc] w-[120px] rounded-full h-[50px]">
+                    </div>
+                  }
+                  <span> Normal</span>
+                </div>
+                <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
+                  <span className="text-[20px] text-[#bababa]"> Wind Status </span>
+                  {
+                    typeof weatherData?.wind.speed === "number" ? <span className="font-semibold text-[30px]"> {typeof indexObj === "undefined" ? "N/A" : indexObj.wind.speed} <span className="text-[30px]"> km/h </span> </span>
+                    : 
+                    <div className="animate-pulse bg-[#def4fc] w-[120px] rounded-full h-[50px]">
+                    </div>
+                  }
+                  <span> Normal</span>
+                </div>
+                <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
+                  <span className="text-[20px] text-[#bababa]"> Visibility </span>
+                  {
+                    typeof weatherData?.visibility === "number" ? <span className="font-semibold text-[30px]"> {typeof indexObj === "undefined" ? "N/A" : Number(indexObj.visibility)/1000} <span className="text-[30px]">km</span> </span>
+                    : 
+                    <div className="animate-pulse bg-[#def4fc] w-[120px] rounded-full h-[50px]">
+                    </div>
+                  }
+                  <span> Normal</span>
+                </div>
+                </div>
+          </div>
         </div>
         }
       </section>   
