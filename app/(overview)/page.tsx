@@ -125,13 +125,16 @@ const Page = () => {
   let indexObj = typeof filteredList === "undefined" ? undefined : filteredList[activeIndex];
 
   return (
-    <div  className="flex flex-col md:flex-row lg:flex-row justify-between p-0 w-full">
-      <section className="flex flex-col w-[110%] md:w-[25%] lg:w-[25%] md:h-screen lg:h-screen md:border lg:border px-10 py-5 md:border-r-2 lg:border-r-2 border-gray-100 md:shadow-xl lg:shadow-xl bg-white md:fixed lg:fixed">
+    <div  className="flex flex-col md:flex-row lg:flex-row md:justify-between lg:justify-between p-0 w-full">
+      <section className="flex flex-col items-center md:w-[25%] lg:w-[25%] md:h-screen lg:h-screen md:border lg:border px-10 py-5 md:border-r-2 lg:border-r-2 border-gray-100 md:shadow-xl lg:shadow-xl bg-white md:fixed lg:fixed">
         <div id="navbar" className="md:hidden lg:hidden fixed flex flex-row justify-between items-center my-2 h-12 border-gray-100 shadow-sm border-b-2 w-[88%] bg-[#fff] z-10">
             <span className="flex flex-row justify-between w-[37%]">
-              <button> Today </button>
               <button
-              className="text-[#bababa]"
+              className={`${forecastPeriod==="today"? "": "text-[#bababa]"}`}
+              onClick={()=> setForecastPeriod("today")}
+              > Today </button>
+              <button
+              className={`${forecastPeriod==="5days"? "": "text-[#bababa]"}`}
               onClick={handleFiveDaysButton}
               > 6 days </button>
             </span>
@@ -272,7 +275,7 @@ const Page = () => {
         </div>
         {
           forecastPeriod === "today" ?
-        <div className="mt-[80px]">
+        <div className="mt-[30px] md:mt-[80px] lg:mt-[80px]">
           <div className="w-full flex flex-col">
             <span className="pl-4">
               <div className="font-bold text-[20px] pt-5"> Description </div>
@@ -374,9 +377,9 @@ const Page = () => {
               </div>
             </div>
           </div>
-          <div className="block px-5 md:pt-3 lg:pt-3">
+          <div className="px-5 md:pt-3 lg:pt-3">
             <span className="font-bold"> Key: </span>
-            <div className="flex fle-row justify-around w-[400px]">
+            <div className="flex flex-row justify-around md:w-[400px] lg:w-[400px]">
               <div className="flex fle-row justify-center items-center">
                 <Image
                   src={sunriseImg}
@@ -415,8 +418,8 @@ const Page = () => {
         :
         //  5 days
         <div className="mt-[90px]">
-          <span className="italic text-[#bababa] fixed top-[80px] z-20"> Please click to preview </span>
-          <div className="flex flex-row pt-5 pb-3 fixed bg-white w-full overflow-auto">
+          <span className="italic text-[#bababa] md:fixed lg:fixed top-[80px] z-20"> Please click to preview </span>
+          <div className="grid grid-cols-6 grid-rows-1 item gap-x-[130px] md:gap-0 lg:gap-0 md:flex lg:flex md:flex-row lg:flex-row pt-5 pb-3 md:fixed lg:fixed bg-white md:w-full lg:w-full overflow-auto">
             {
               typeof filteredList === "undefined"? <></> :
               filteredList.map((preview, index) => {
@@ -426,7 +429,7 @@ const Page = () => {
                 return (
                   <div 
                   key={index} 
-                  className="flex flex-col items-center border shadow-md w-[120px] h-[160px] py-8 mx-2 rounded-xl cursor-pointer"
+                  className="flex flex-col items-center border shadow-md w-[30vw] md:w-[120px] lg:w-[120px] md:h-[190px] lg:h-[190px] py-4 mx-2 rounded-xl cursor-pointer"
                   onClick={() => setActiveIndex(index)}
                   >
                     <span> {dayName} </span>
@@ -436,7 +439,7 @@ const Page = () => {
                       alt=""
                       width={40}
                       height={40}
-                      className="h-[100px] rounded-lg opacity-80"
+                      className="h-[100px] w-[100px] rounded-lg opacity-80"
                     />
                     <span> {`${preview.main.temp}${unit==="metric"? "°C": "°F"}`} </span>
                   </div>
@@ -444,7 +447,7 @@ const Page = () => {
               })
             }
           </div>
-          <div className="mt-[200px]">
+          <div className="mt-[60px] md:mt-[250px] lg:mt-[250px]">
             <span className="font-bold text-[20px] pl-3"> Preview </span>
             <div className="grid md:grid-cols-3 lg:grid-cols-3 grid-cols-2 md:grid-rows-2 place-items-center lg:grid-rows-2 grid-rows-3 gap-y-4 py-4">
                 <div className="rounded-[10px] shadow-md transition-shadow duration-500 delay-200 hover:shadow-xl flex flex-col justify-center items-center border md:w-[250px] lg:w-[250px] w-[160px] py-8 md:h-[220px] lg:h-[220px] h-[170px]">
