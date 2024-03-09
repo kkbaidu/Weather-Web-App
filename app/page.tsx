@@ -126,17 +126,17 @@ const Page = () => {
 
   return (
     <div  className="flex flex-col md:flex-row lg:flex-row md:justify-between lg:justify-between p-0 w-full">
-      <section className="flex flex-col items-center md:w-[25%] lg:w-[25%] md:h-screen lg:h-screen md:border lg:border px-10 py-5 md:border-r-2 lg:border-r-2 border-gray-100 md:shadow-xl lg:shadow-xl bg-white md:fixed lg:fixed">
-        <div id="navbar" className="md:hidden lg:hidden fixed flex flex-row justify-between items-center my-2 h-12 border-gray-100 shadow-sm border-b-2 w-[88%] bg-[#fff] z-10">
-            <span className="flex flex-row justify-between w-[37%]">
+      <section className="flex flex-col w-full md:w-[25%] lg:w-[25%] md:h-screen lg:h-screen md:border lg:border py-5 md:border-r-2 lg:border-r-2 border-gray-100 md:shadow-xl lg:shadow-xl bg-white md:fixed lg:fixed">
+        <div id="navbar" className="md:hidden lg:hidden fixed top-0 flex flex-row justify-between items-center my-2 h-12 border-gray-100 shadow-sm border-b-2 w-full px-5 bg-[#fff] z-10">
+            <span className="flex flex-row justify-between w-[47%]">
               <button
-              className={`${forecastPeriod==="today"? "": "text-[#bababa]"}`}
+              className={`${forecastPeriod==="today"? "font-bold": "text-[#bababa]"}`}
               onClick={()=> setForecastPeriod("today")}
               > Today </button>
               <button
-              className={`${forecastPeriod==="5days"? "": "text-[#bababa]"}`}
+              className={`${forecastPeriod==="5days"? "font-bold": "text-[#bababa]"}`}
               onClick={handleFiveDaysButton}
-              > 6 days </button>
+              > 5 days preview </button>
             </span>
             <span className="h-full flex flex-row items-center">
               <button 
@@ -157,102 +157,104 @@ const Page = () => {
               > °F </button>
             </span>
         </div>
-        <span className="p-input-icon-left mt-20 md:mt-5 lg:mt-5 w-full">
-            <i className="pi pi-search pl-2" />
-            <InputText 
-            className="pl-7 border outline-none w-full h-10 rounded-md"
-            placeholder="search for city..." 
-            onChange={handleSearch}
-            />
-        </span>
-        <div className="flex flex-col items-center border-gray-100 shadow-sm border-b-2 pb-8">
-          {
-            typeof weatherData.weather[0].icon === "string" ? 
-            <Image
-              loader={imageLoader}
-              src={icon}
-              alt="Image"
-              width={200}
-              height={200}
-            /> : 
-          <div className="animate-pulse bg-[#def4fc] py-8 w-[140px] h-[140px] rounded-full mt-[30px]">
-          </div>
-          }
-          <div className="text-[70px]"> 
-          {
-            typeof weatherData?.main.temp === "number" ? `${weatherData?.main.temp}${unit==="metric"? "°C": "°F"}` : 
-            <div className="animate-pulse bg-[#def4fc] w-[240px] rounded-full mt-[60px] h-[60px]">
-            </div>
-          }
-          </div>
-          
+        <div className="px-10">
+          <span className="p-input-icon-left mt-20 md:mt-5 lg:mt-5 w-full  border">
+              <i className="pi pi-search pl-2" />
+              <InputText 
+              className="pl-7 border outline-none w-full h-10 rounded-md"
+              placeholder="search for city..." 
+              onChange={handleSearch}
+              />
+          </span>
+          <div className="flex flex-col items-center border-gray-100 shadow-sm border-b-2 pb-8">
             {
-              typeof weatherData.dt === "number" ?
-              <div className="text-[#bababa]">
-                <span className="text-black"> {`${days[Number(convertToLocalTime(weatherData.dt)[2])-4]},`} </span> {`${convertToLocalTime(weatherData.dt)[3]}: ${convertToLocalTime(weatherData.dt)[4]}`} 
-              </div>
-            :
-            <div className="animate-pulse bg-[#def4fc] py-4 w-[90px] rounded-full mt-3 h-[10px]">
+              typeof weatherData.weather[0].icon === "string" ? 
+              <Image
+                loader={imageLoader}
+                src={icon}
+                alt="Image"
+                width={200}
+                height={200}
+              /> : 
+            <div className="animate-pulse bg-[#def4fc] py-8 w-[140px] h-[140px] rounded-full mt-[30px]">
             </div>
             }
-          </div>
-        <div className="pt-[30px]">
-          <span className="flex flex-row justify-left items-center"> 
-          <Image
-            src={cloudImg}
-            alt=""
-            width={40}
-            height={40}
-          />
-            <span>
-              {
-                typeof weatherData.clouds.all === "number" ? <span> Cloudy @ {weatherData.clouds.all}%</span> 
-                : 
-                <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
-                </div>
-              } 
-            </span>
-          </span>
-          <span className="flex flex-row justify-left items-center"> 
-          {/* #def4fc */}
-          <Image
-            src={rainyCloud}
-            alt=""
-            width={40}
-            height={40}
-          />
-            <span> 
+            <div className="text-[70px]"> 
             {
-                typeof weatherData.weather[0].main === "string" ? <span> Main: {weatherData.weather[0].main}</span> 
-                : 
-                <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
+              typeof weatherData?.main.temp === "number" ? `${weatherData?.main.temp}${unit==="metric"? "°C": "°F"}` : 
+              <div className="animate-pulse bg-[#def4fc] w-[240px] rounded-full mt-[60px] h-[60px]">
+              </div>
+            }
+            </div>
+            
+              {
+                typeof weatherData.dt === "number" ?
+                <div className="text-[#bababa]">
+                  <span className="text-black"> {`${days[Number(convertToLocalTime(weatherData.dt)[2])-4]},`} </span> {`${convertToLocalTime(weatherData.dt)[3]}: ${convertToLocalTime(weatherData.dt)[4]}`} 
                 </div>
-              } 
+              :
+              <div className="animate-pulse bg-[#def4fc] py-4 w-[90px] rounded-full mt-3 h-[10px]">
+              </div>
+              }
+            </div>
+          <div className="pt-[30px]">
+            <span className="flex flex-row justify-left items-center"> 
+            <Image
+              src={cloudImg}
+              alt=""
+              width={40}
+              height={40}
+            />
+              <span>
+                {
+                  typeof weatherData.clouds.all === "number" ? <span> Cloudy @ {weatherData.clouds.all}%</span> 
+                  : 
+                  <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
+                  </div>
+                } 
+              </span>
             </span>
+            <span className="flex flex-row justify-left items-center"> 
+            {/* #def4fc */}
+            <Image
+              src={rainyCloud}
+              alt=""
+              width={40}
+              height={40}
+            />
+              <span> 
+              {
+                  typeof weatherData.weather[0].main === "string" ? <span> Main: {weatherData.weather[0].main}</span> 
+                  : 
+                  <div className="animate-pulse bg-[#def4fc] w-[35px] rounded-full h-[20px]">
+                  </div>
+                } 
+              </span>
+            </span>
+          </div>
+          <span className="hidden md:flex relative mt-5 lg:flex justify-center items-center bg-black rounded-lg"> 
+            <Image
+              src={cityImg}
+              alt=""
+              width={300}
+              height={100}
+              className="h-[100px] rounded-lg opacity-80"
+            />
+            <span className="absolute text-white font-extrabold"> {`${weatherData?.name}, ${weatherData?.sys.country}`} </span>
           </span>
         </div>
-        <span className="hidden md:flex relative mt-5 lg:flex justify-center items-center bg-black rounded-lg"> 
-          <Image
-            src={cityImg}
-            alt=""
-            width={300}
-            height={100}
-            className="h-[100px] rounded-lg opacity-80"
-          />
-          <span className="absolute text-white font-extrabold"> {`${weatherData?.name}, ${weatherData?.sys.country}`} </span>
-        </span>
       </section>
-      <section className="flex flex-col w-[110%] md:ml-[28%] lg:ml-[28%]">
+      <section className="flex flex-col w-full md:ml-[28%] lg:ml-[28%]">
         <div id="navbar" className="hidden fixed lg:flex md:flex flex-row justify-between items-center px-4 mt-8 h-12 border-gray-100 shadow-sm border-b-2 w-[70%] bg-white">
-          <span className="flex flex-row justify-between w-[12%]">
+          <span className="flex flex-row justify-between w-[20%]">
             <button
-            className={`${forecastPeriod==="today"? "": "text-[#bababa]"}`}
+            className={`${forecastPeriod==="today"? "font-bold": "text-[#bababa]"}`}
             onClick={()=> setForecastPeriod("today")}
             > Today </button>
             <button 
-            className={`${forecastPeriod==="5days"? "": "text-[#bababa]"}`}
+            className={`${forecastPeriod==="5days"? "font-bold": "text-[#bababa]"}`}
             onClick={handleFiveDaysButton}
-            > 6 days </button>
+            > 5 days Preview </button>
           </span>
           <span className="h-full flex flex-row items-center">
             <button 
@@ -402,7 +404,7 @@ const Page = () => {
               </div>
             </div>
           </div>
-          <div className="block md:hidden lg:hidden px-[10px]">
+          <div className="block md:hidden lg:hidden px-[10px] w-full">
             <span className="relative mt-5 flex justify-center items-center bg-black rounded-t-lg"> 
               <Image
                 src={cityImg}
@@ -418,7 +420,8 @@ const Page = () => {
         :
         //  5 days
         <div className="mt-[90px]">
-          <span className="italic text-[#bababa] md:fixed lg:fixed top-[80px] z-20"> Please click to preview </span>
+          <span className="hidden md:block lg:block italic text-[#bababa] md:fixed lg:fixed top-[80px] z-20"> Please click to preview </span>
+          <span className="block md:hidden lg:hidden italic text-[#bababa] md:fixed lg:fixed top-[80px] z-20 ml-2"> Please tap to preview {'(swipe to the right to see more)'} </span>
           <div className="grid grid-cols-6 grid-rows-1 item gap-x-[130px] md:gap-0 lg:gap-0 md:flex lg:flex md:flex-row lg:flex-row pt-5 pb-3 md:fixed lg:fixed bg-white md:w-full lg:w-full overflow-auto">
             {
               typeof filteredList === "undefined"? <></> :
